@@ -1,0 +1,446 @@
+------------------------C R I A N D O   B A N C O   D E     D A D O S----------------------------
+selecet id_medico, count(*) as TotalConsultas
+from Consultas
+group by id_medico
+having count(*)>5;
+
+
+
+
+SELECT E.nome_especialidade,
+COUNT(C.id_consulta)AS TotalConsultas,
+       AVG(C.valor)AS MediaConsultas,
+       SUM(C.valor)AS Faturamento
+FROM Consultas AS C
+JOIN Medicos AS M ON C.id_medico= M.id_medico
+JOIN Especialidades AS E ON M.id_especialidade= E.id_especialidade
+GROUP BY E.nome_especialidade
+HAVING SUM(C.valor)>1000
+ORDER BY Faturamento DESC;
+
+
+
+
+CREATE DATABASE EscolaDB;
+USE EscolaDB;
+
+
+CREATE TABLE Alunos (
+    id_aluno INT PRIMARY KEY AUTO_INCREMENT,
+    nome VARCHAR(100),
+    cidade VARCHAR(100),
+    idade INT
+);
+
+
+CREATE TABLE Cursos (
+    id_curso INT PRIMARY KEY AUTO_INCREMENT,
+    nome_curso VARCHAR(100),
+    carga_horaria INT
+);
+
+
+CREATE TABLE Matriculas (
+    id_matricula INT PRIMARY KEY AUTO_INCREMENT,
+    id_aluno INT,
+    id_curso INT,
+    nota DECIMAL(4,2),
+    faltas INT,
+    FOREIGN KEY (id_aluno) REFERENCES Alunos(id_aluno),
+    FOREIGN KEY (id_curso) REFERENCES Cursos(id_curso)
+);
+
+
+INSERT INTO Alunos (nome, cidade, idade)VALUES
+('Carlos','São Paulo',18),
+('Mariana','Curitiba',22),
+('João','Florianópolis',19),
+('Fernanda','São Paulo',25),
+('Lucas','Rio de Janeiro',20),
+('Patricia','Curitiba',21),
+('Ana','Porto Alegre',23),
+('Bruno','São Paulo',24);
+
+
+INSERT INTO Cursos (nome_curso, carga_horaria)VALUES
+('Python',40),
+('Banco de Dados',60),
+('Java',80),
+('Data Science',100);
+
+
+INSERT INTO Matriculas (id_aluno, id_curso, nota, faltas)VALUES
+(1,1,8.5,2),
+(1,2,7.0,5),
+(2,1,9.5,1),
+(2,4,8.0,4),
+(3,2,6.5,6),
+(3,3,7.5,3),
+(4,4,9.0,0),
+(5,1,5.5,10),
+(5,2,6.0,7),
+(6,3,8.5,2),
+(7,4,7.0,5),
+(8,2,9.5,1);
+
+
+
+
+
+
+
+
+
+
+
+--------------------E X E R C I C I O   B A N C O   D E   D A D O S--------------------------
+-- liste todos os aluno cadastrados
+
+
+select *
+from Alunos;
+
+
+-- liste todos os alunos
+select nome
+from Alunos;
+
+
+-- exiba os cursos com carga horaria igual e 80 horas
+
+
+select nome_curso
+from Cursos;
+
+
+-- Exiba os alunos que moram em são paulo
+
+
+select *
+from Alunos
+where cidade = 'são paulo';
+
+
+-- liste os alunos com idades maior que 20 anos
+
+
+select *
+from Alunos
+where idade > 20
+
+
+
+
+-- Exiba os cursos com carga horária maior que 50 horas.
+
+
+select *
+from Cursos
+where carga_horaria > 50;
+
+
+-- Mostre os alunos com idade entre 18 e 22 anos.
+
+
+select *
+from Alunos
+where idade BETWEEN 18 and 22;
+
+
+
+
+
+
+-- Liste os alunos da cidade de Curitiba.
+
+
+select NOME, IDADE
+from Alunos
+where cidade = 'Curitiba';
+
+
+-- Exiba os alunos cuja idade seja menor que 21 anos.
+
+
+select *
+from Alunos
+where idade < 21;
+
+
+
+
+-- Liste todas as matrículas cadastradas.
+
+
+select id_matricula
+from Matriculas;
+
+
+
+
+-- Mostre os alunos que possuem nota maior que 8.
+
+
+select A.nome, C.nome_curso, M.nota
+from Alunos AS A
+JOIN Matriculas AS M ON A.id_aluno = M.id_aluno
+JOIN Cursos AS C ON M.id_curso = C.id_curso
+WHERE M.nota > 8;
+
+
+
+
+-- liste os alunos que tiveram mais de 5 faltas.
+
+
+select A.nome, C.nome_curso, M.faltas
+from Alunos AS A
+JOIN Matriculas AS M ON A.id_aluno = M.id_aluno
+JOIN Cursos AS C ON M.id_curso = C.id_curso
+where M.faltas > 5;
+
+
+-- Exiba os cursos com carga horária igual a 80 horas.
+select carga_horaria, nome_curso
+from Cursos
+where carga_horaria = 80;
+
+
+
+
+
+
+-- Mostre os alunos que NÃO moram em São Paulo.
+select nome,cidade
+from Alunos
+where cidade!= 'são paulo';
+
+
+-- Liste os alunos cujo nome começa com a letra “A”.
+select nome
+from Alunos
+where nome LIKE'%A%';
+
+
+-- Exiba os alunos cujo nome termina com a letra “a”.
+select nome
+from Alunos
+where nome LIKE '%a';
+
+
+-- Liste os cursos cujo nome contenha a palavra “Dados”.
+
+
+select nome_curso
+from Cursos
+where nome_curso LIKE '%Dados%';
+
+
+
+
+-- Mostre as matrículas com nota entre 7 e 9.
+
+
+select id_matricula
+from Matriculas
+where nota BETWEEN 7 and 9;
+
+
+-- Liste os alunos que possuem exatamente 20 anos.
+
+
+select nome
+from Alunos
+where idade = 20;
+
+
+-- Exiba os cursos com carga horária menor ou igual a 60 horas.
+
+
+select nome_curso
+from Cursos
+where carga_horaria <= 60;
+-- Mostre quantos alunos existem em cada cidade.
+select cidade, count(*) as Total_Alunos
+from Alunos
+group by cidade;
+
+
+-- Exiba a média de idade dos alunos agrupada por cidade.
+
+
+select cidade, AVG(idade) as Media_idade
+from Alunos
+group by cidade;
+
+
+-- Mostre a quantidade de matrículas por curso.
+SELECT C.nome_curso, COUNT(*) AS Matriculas_cursos
+FROM Matriculas AS M
+JOIN Cursos AS C ON M.id_curso = C.id_curso
+GROUP BY C.nome_curso;
+
+
+-- exiba a média das notas por curso.
+
+
+SELECT C.nome_curso, AVG(M.nota) AS Media_nota_curso
+FROM Matriculas AS M
+JOIN Cursos AS C ON M.id_curso = C.id_curso
+GROUP BY C.nome_curso;
+
+
+-- Mostre o total de faltas agrupado por curso.
+
+
+select C.nome_curso, SUM(M.faltas) as Falta_agrupada_por_curso
+FROM Matriculas AS M
+JOIN Cursos AS C ON M.id_curso = C.id_curso
+Group by C.nome_curso;
+
+
+-- Liste a maior nota obtida em cada curso.
+
+
+select C.nome_curso, MAX(M.nota) as Maior_nota_obtida_por_curso
+FROM Matriculas AS M
+JOIN Cursos as C ON M.id_curso = C.id_curso
+Group by C.nome_curso;
+
+
+-- exiba a menor nota registrada em cada curso.
+
+
+select C.nome_curso, MIN(M.nota) as Maior_nota_obtida_por_curso
+FROM Matriculas AS M
+JOIN Cursos as C ON M.id_curso = C.id_curso
+Group by C.nome_curso;
+
+
+
+
+
+
+
+
+
+
+-- Mostre a soma total das faltas agrupadas por aluno.
+select A.nome, SUM(M.faltas) as Falta_agrupada_por_aluno
+FROM Matriculas AS M
+JOIN Alunos AS A ON M.id_aluno = A.id_aluno
+Group by A.nome;
+
+
+-- Exiba a média de notas agrupada por aluno.
+select A.nome, AVG(M.nota) as Notas_agrupada_por_aluno
+FROM Matriculas AS M
+JOIN Alunos AS A ON M.id_aluno = A.id_aluno
+Group by A.nome;
+
+
+-- Mostre quantos alunos existem em cada faixa etária.
+select idade, count(*) as faixa_etaria_alunos
+from Alunos
+Group by idade;
+
+
+-- Liste as cidades que possuem mais de 2 alunos
+SELECT cidade
+FROM Alunos
+GROUP BY cidade
+HAVING COUNT(*) > 2;    
+
+
+-- Exiba os cursos cuja média de notas seja maior que 8.
+SELECT C.nome_curso, AVG(M.nota) AS Media_Curso
+FROM Matriculas AS M
+JOIN Cursos AS C ON M.id_curso = C.id_curso
+GROUP BY C.nome_curso
+HAVING AVG(M.nota) > 8;
+
+
+-- Mostre os cursos que possuem mais de 2 matrículas.
+select C.nome_curso, count(M.id_matricula) as Total_matriculas
+from Matriculas AS M
+JOIN Cursos AS C ON M.id_curso = C.id_curso
+Group by C.nome_curso
+having count(M.id_matricula) > 2;
+
+
+
+
+
+
+
+
+
+
+
+
+-- liste os alunos cuja soma de faltas seja maior que 5.
+SELECT A.nome, SUM(M.nota) as Total_faltas
+FROM Matriculas AS M
+JOIN Alunos AS A ON M.id_aluno = A.id_aluno
+Group by A.nome
+HAVING SUM(M.nota) > 5;
+
+
+-- Exiba os cursos cuja menor nota seja maior que 6.
+SELECT C.nome_curso, MIN(M.nota) AS Media_Curso
+FROM Matriculas AS M
+JOIN Cursos AS C ON M.id_curso = C.id_curso
+GROUP BY C.nome_curso
+HAVING MIN(M.nota) > 6;
+
+
+-- Mostre os cursos ordenados pela carga horária em ordem decrescente.
+select C.nome_curso, C.carga_horaria as Resultado
+from Cursos as C
+ORDER BY carga_horaria DESC;
+
+
+
+
+-- Liste os alunos ordenados por idade do maior para o menor.
+select A.nome, A.idade as Resultado
+from Alunos as A
+order by idade DESC;
+
+
+
+
+-- Exiba a média de notas por curso ordenada da maior para a menor.
+select C.nome_curso, AVG(M.nota) as Resultado
+from Matriculas as M
+JOIN Cursos AS C on M.id_curso = C.id_curso
+group by C.nome_curso
+order by Resultado desc;
+
+
+
+
+-- Mostre as cidades ordenadas pela quantidade de alunos.
+select cidade, count(*) as quantidade_alunos
+FROM Alunos
+GROUP BY cidade
+ORDER BY quantidade_alunos;
+
+
+
+
+
+
+
+
+
+
+
+
+-- Liste os alunos com média de notas maior que 7 ordenados pela média decrescente.
+SELECT A.nome, AVG(M.nota) as Resultado_media
+FROM Matriculas AS M
+JOIN Alunos AS A ON M.id_aluno = A.id_aluno
+Group by A.nome
+HAVING AVG(M.nota) > 5;
+order by Resultado_media DESC;
