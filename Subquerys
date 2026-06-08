@@ -1,0 +1,176 @@
+-- ==============================================================================
+-- 1. CRIAÇÃO DA TABELA E INSERÇÃO DOS DADOS
+-- ==============================================================================
+
+CREATE TABLE IF NOT EXISTS Itens_Estoque (
+    idItem INT NOT NULL AUTO_INCREMENT,
+    descricaoItem VARCHAR(200),
+    setorItem VARCHAR(200),
+    precoVendaItem DECIMAL(9,2),
+    estoqueItem INT,
+    PRIMARY KEY (idItem)
+); 
+
+INSERT INTO Itens_Estoque (descricaoItem, setorItem, precoVendaItem, estoqueItem) VALUES
+('Suco de Laranja', 'Bebidas', 7.50, 250),
+('Macarrão 1kg', 'Alimentos', 5.20, 180),
+('Sabão em pó', 'Limpeza', 12.90, 90),
+('Café Torrado', 'Alimentos', 15.80, 120),
+('Iogurte Natural', 'Laticínios', 4.30, 350),
+('Biscoito Integral', NULL, 3.90, 210),
+('Molho de Tomate', 'Alimentos', 2.80, 500);
+
+
+-- ==============================================================================
+-- 2. QUESTÕES BÁSICAS — SUBQUERY COMO FILTRO
+-- ==============================================================================
+
+-- Q1. Liste os itens que possuem o maior preço de venda cadastrado.
+SELECT * FROM Itens_Estoque 
+WHERE precoVendaItem = (SELECT MAX(precoVendaItem) FROM Itens_Estoque);
+
+-- Q2. Exiba os itens que possuem estoque menor que a média dos estoques.
+SELECT * FROM Itens_Estoque 
+WHERE estoqueItem < (SELECT AVG(estoqueItem) FROM Itens_Estoque);
+
+-- Q3. Mostre os itens que pertencem ao setor que possui a maior média de preço.
+SELECT * FROM Itens_Estoque 
+WHERE setorItem = (
+    SELECT setorItem FROM Itens_Estoque 
+    GROUP BY setorItem 
+    ORDER BY AVG(precoVendaItem) DESC 
+    LIMIT 1
+);
+
+-- Q4. Liste os itens que possuem preço igual ao menor preço registrado.
+SELECT * FROM Itens_Estoque 
+WHERE precoVendaItem = (SELECT MIN(precoVendaItem) FROM Itens_Estoque);
+
+-- Q5. Exiba os itens que possuem preço menor que a média geral dos preços.
+SELECT * FROM Itens_Estoque 
+WHERE precoVendaItem < (SELECT AVG(precoVendaItem) FROM Itens_Estoque);
+
+-- Q6. Mostre os itens cujo estoque seja maior que a média das quantidades em estoque.
+SELECT * FROM Itens_Estoque 
+WHERE estoqueItem > (SELECT AVG(estoqueItem) FROM Itens_Estoque);
+
+-- Q7. Liste os itens que possuem exatamente a menor quantidade em estoque cadastrada.
+SELECT * FROM Itens_Estoque 
+WHERE estoqueItem = (SELECT MIN(estoqueItem) FROM Itens_Estoque);
+
+-- Q8. Exiba os itens do setor 'Alimentos' que possuem preço maior que a média de preço do próprio setor.
+SELECT * FROM Itens_Estoque 
+WHERE setorItem = 'Alimentos' 
+  AND precoVendaItem > (SELECT AVG(precoVendaItem) FROM Itens_Estoque WHERE setorItem = 'Alimentos');
+
+-- Q9. Mostre os itens que possuem preço diferente do maior preço cadastrado.
+SELECT * FROM Itens_Estoque 
+WHERE precoVendaItem <> (SELECT MAX(precoVendaItem) FROM Itens_Estoque);
+
+-- Q10. Liste os itens cujo estoque seja diferente do menor estoque registrado.
+SELECT * FROM Itens_Estoque 
+WHERE estoqueItem <> (SELECT MIN(estoqueItem) FROM Itens_Estoque);
+
+
+-- ==============================================================================
+-- 3. QUESTÕES INTERMEDIÁRIAS — SUBQUERY COM IN / NOT IN
+-- ==============================================================================
+
+-- Q11. Liste os itens que pertencem aos setores que possuem mais de 1 produto cadastrado.
+SELECT * FROM Itens_Estoque 
+WHERE setorItem IN (
+    SELECT setorItem FROM Itens_Estoque 
+    GROUP BY setorItem 
+    HAVING COUNT(*) > 1
+);
+
+-- Q12. Exiba os itens que estão nos mesmos setores dos itens com estoque abaixo de 100 unidades.
+SELECT * FROM Itens_Estoque 
+WHERE setorItem IN (SELECT DISTINCT setorItem FROM Itens_Estoque WHERE estoqueItem < 100);
+
+-- Q13. Mostre os itens que NÃO possuem setor definido (setorItem é NULL) utilizando subquery para isolar IDs.
+SELECT * FROM Itens_Estoque 
+WHERE idItem IN (SELECT idItem FROM Itens_Estoque WHERE setorItem IS NULL);
+
+-- Q14. Liste os itens que estão em setores cuja soma de estoque ultrapassa 500 unidades.
+SELECT * FROM Itens_Estoque 
+WHERE setorItem IN (
+    SELECT setorItem FROM Itens_Estoque 
+    GROUP BY setorItem 
+    HAVING SUM(estoqueItem) > 500
+);
+
+-- Q15. Exiba os itens que pertencem a setores que possuem algum produto com preço superior a R$ 10,00.
+SELECT * FROM Itens_Estoque 
+WHERE setorItem IN (SELECT DISTINCT setorItem FROM Itens_Estoque WHERE precoVendaItem > 10.00);
+
+-- Q16. Mostre os itens que estão em setores que NÃO sejam 'Bebidas' nem 'Limpeza'.
+SELECT * FROM Itens_Estoque 
+WHERE setorItem NOT IN ('Bebidas', 'Limpeza') OR setorItem IS NULL;
+
+
+-- ==============================================================================
+-- 4. QUESTÕES AVANÇADAS — SUBQUERY COM OPERADORES DE COMPARAÇÃO
+-- ==============================================================================
+
+-- Q17. Exiba os itens cujo preço seja maior que a média de preço dos itens do setor 'Alimentos'.
+SELECT * FROM Itens_Estoque 
+WHERE precoVendaItem > (SELECT AVG(precoVendaItem) FROM Itens_Estoque WHERE setorItem = 'Alimentos');
+
+-- Q18. Liste os itens cujo estoque seja maior que a soma de estoque do setor 'Bebidas'.
+SELECT * FROM Itens_Estoque 
+WHERE estoqueItem > (SELECT SUM(estoqueItem) FROM Itens_Estoque WHERE setorItem = 'Bebidas');
+
+-- Q19. Mostre os itens cujo preço de venda seja maior que todos os preços do setor 'Laticínios'.
+SELECT * FROM Itens_Estoque 
+WHERE precoVendaItem > ALL (SELECT precoVendaItem FROM Itens_Estoque WHERE setorItem = 'Laticínios');
+
+-- Q20. Exiba os itens que possuem estoque menor que qualquer item do setor 'Alimentos' (menor que o máximo de Alimentos).
+SELECT * FROM Itens_Estoque 
+WHERE estoqueItem < ANY (SELECT estoqueItem FROM Itens_Estoque WHERE setorItem = 'Alimentos');
+
+
+-- ==============================================================================
+-- 5. QUESTÕES — SUBQUERY COMO NOVA COLUNA (CORRELACIONADA)
+-- ==============================================================================
+
+-- Q21. Liste os itens e exiba ao lado a média de preço do setor ao qual ele pertence.
+SELECT descricaoItem, setorItem, precoVendaItem,
+       (SELECT AVG(precoVendaItem) FROM Itens_Estoque i2 WHERE i2.setorItem = i1.setorItem) AS Media_Preco_Setor
+FROM Itens_Estoque i1;
+
+-- Q22. Liste os itens e mostre a quantidade total de itens cadastrados no mesmo setor.
+SELECT descricaoItem, setorItem,
+       (SELECT COUNT(*) FROM Itens_Estoque i2 WHERE i2.setorItem = i1.setorItem) AS Total_Produtos_Setor
+FROM Itens_Estoque i1;
+
+-- Q23. Exiba os itens e mostre a diferença de preço entre o item e o produto mais caro do mercado.
+SELECT descricaoItem, precoVendaItem,
+       ((SELECT MAX(precoVendaItem) FROM Itens_Estoque) - precoVendaItem) AS Diferenca_Para_O_Mais_Caro
+FROM Itens_Estoque;
+
+-- Q24. Mostre os itens e a soma total de estoque acumulado do seu respectivo setor.
+SELECT descricaoItem, setorItem, estoqueItem,
+       (SELECT SUM(estoqueItem) FROM Itens_Estoque i2 WHERE i2.setorItem = i1.setorItem) AS Total_Estoque_Setor
+FROM Itens_Estoque i1;
+
+
+-- ==============================================================================
+-- 6. QUESTÕES DESAFIO — MISTURANDO GROUP BY + HAVING + SUBQUERY
+-- ==============================================================================
+
+-- Q25. Liste os setores cuja média de estoque seja maior que a média geral de estoque do sistema.
+SELECT setorItem, AVG(estoqueItem) AS Media_Estoque_Setor
+FROM Itens_Estoque
+WHERE setorItem IS NOT NULL
+GROUP BY setorItem
+HAVING AVG(estoqueItem) > (SELECT AVG(estoqueItem) FROM Itens_Estoque);
+
+-- Q26. Exiba os setores cuja soma do valor total em estoque (Preço * Estoque) seja maior que a média das somas de todos os setores.
+SELECT setorItem, SUM(precoVendaItem * estoqueItem) AS Valor_Total_Estoque
+FROM Itens_Estoque
+WHERE setorItem IS NOT NULL
+GROUP BY setorItem
+HAVING SUM(precoVendaItem * estoqueItem) > (
+    SELECT AVG(sub_valor) 
+    FROM (SELECT SUM(precoVendaItem * estoqueItem) AS sub_valor FROM Itens_Estoque GROUP BY setorItem) AS sub
